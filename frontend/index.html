@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Social Network</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2 { color: #333; }
+    input, button { display: block; margin: 5px 0; padding: 8px; width: 250px; }
+    button { width: 100px; }
+    #feed { list-style: none; padding-left: 0; }
+    #feed li { background: #f4f4f4; margin: 5px 0; padding: 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Mini Social Network</h1>
+
+  <!-- Register Section -->
+  <h2>Register</h2>
+  <input id="reg-username" placeholder="Username">
+  <input id="reg-email" placeholder="Email">
+  <input id="reg-password" placeholder="Password" type="password">
+  <button onclick="register()">Register</button>
+
+  <!-- Login Section -->
+  <h2>Login</h2>
+  <input id="login-username" placeholder="Username">
+  <input id="login-password" placeholder="Password" type="password">
+  <button onclick="login()">Login</button>
+
+  <!-- Create Post Section -->
+  <h2>Create Post</h2>
+  <input id="post-content" placeholder="Write something...">
+  <button onclick="createPost()">Post</button>
+
+  <!-- Feed Section -->
+  <h2>Feed</h2>
+  <ul id="feed"></ul>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>

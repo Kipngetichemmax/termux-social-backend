@@ -1,29 +1,36 @@
-from flask import Flask, jsonify
+import os
+from flask import Flask, send_from_directory
 from flask_migrate import Migrate
 from app.config import config
 from app.extensions import db, bcrypt, cache
 from app.api.middleware import limiter
+from app.utils.errors import APIError
 
+# Initialize Migrate object
 migrate = Migrate()
 
 def create_app(config_name='default'):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config[config_name])
 
+    # -----------------------
     # Initialize extensions
+    # -----------------------
     db.init_app(app)
     bcrypt.init_app(app)
     cache.init_app(app)
     limiter.init_app(app)
-
-    # Link migrate to app and db
     migrate.init_app(app, db)
 
-    # Import models inside the factory to register them with db
+    # -----------------------
+    # Import models inside app context
+    # -----------------------
     with app.app_context():
-        from app.models import User, Post
+        from app import models
 
+    # -----------------------
     # Register blueprints
+    # -----------------------
     from app.api.auth import auth_bp
     from app.api.users import users_bp
     from app.api.posts import posts_bp
@@ -34,28 +41,28 @@ def create_app(config_name='default'):
     app.register_blueprint(posts_bp, url_prefix='/api/posts')
     app.register_blueprint(feed_bp, url_prefix='/api/feed')
 
-    # Root route for browser
-    @app.route("/")
-    def home():
-        return jsonify({
-            "message": "Welcome to Social Network API",
-            "available_endpoints": {
-                "auth": "/api/auth",
-                "users": "/api/users",
-                "posts": "/api/posts",
-                "feed": "/api/feed"
-            }
-        })
-
+    # -----------------------
     # Register error handlers
+    # -----------------------
     register_error_handlers(app)
+
+    # -----------------------
+    # Serve frontend files
+    # -----------------------
+    frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+
+    @app.route("/")
+    def serve_index():  # Renamed to avoid conflicts
+        return send_from_directory(frontend_dir, "index.html")
+
+    @app.route("/<path:filename>")
+    def serve_assets(filename):
+        return send_from_directory(frontend_dir, filename)
 
     return app
 
 
 def register_error_handlers(app):
-    from app.utils.errors import APIError
-
     @app.errorhandler(APIError)
     def handle_api_error(error):
         return error.to_dict(), error.status_code
